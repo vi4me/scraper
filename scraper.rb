@@ -1,43 +1,42 @@
-require 'nokogiri'
-require 'httparty'
-require 'byebug'
+require 'mechanize'
+require 'date'
+require 'json'
 
-def scraper
+agent = Mechanize.new
+page  = agent.get('http://pitchfork.com/reviews/albums/')
 
-	url = 'http://baskino.me/new/'
-	unparsed_page = HTTParty.get(url)
-	parsed_page = Nokogiri::HTML(unparsed_page)
-	films = Array.new
-	film_cards = parsed_page.css('div.shortpost') #12
-	page = 1
-	per_page = film_cards.count
-	total = per_page*20
-	last_page = (total.to_f / per_page.to_f).round
-	while page <= last_page
-		pagination_url = "http://baskino.me/new/page/#{page}"
-		puts "Адрес страницы: " + pagination_url
-		puts "Страница: #{page}"
-		puts ""
-		pagination_unparsed_page = HTTParty.get(pagination_url)
-		pagination_parsed_page = Nokogiri::HTML(pagination_unparsed_page)
-		pagination_film_cards = pagination_parsed_page.css('div.shortpost')
-		pagination_film_cards.each do |film_card|
-		
-			film = {
-				title: film_card.css('div.posttitle a').text,
-				date: film_card.css('div.postdata .linline').text,
-    			year: film_card.css('div.postdata .rinline').text,
-    			img: film_card.css('div.postcover a img')[0].attributes["src"].value
-			}
-			films << film
-			puts "Название фильма: #{film[:title]}"
-			puts "Дата выпуска: #{film[:date]}"
-			puts "#{film[:year]}"
-			puts "Ссылка на картинку: #{film[:img]}"
-		end
-		page += 1
-	end
-	
+review_links = page.links_with(href: %r{^/reviews/albums/\w+})
+
+review_links = review_links.reject do |link|
+  parent_classes = link.node.parent['class'].split
+  parent_classes.any? { |p| %w[next-container page-number].include?(p) }
 end
 
-scraper
+review_links = review_links[0...4]
+
+reviews = review_links.map do |link|
+  review = link.click
+  review_meta = review.search('div#site-content')
+  artist = review_meta.search('h1').text
+  album = review_meta.search('h2').text
+  img = review_meta.search('.single-album-tombstone__art img').attr('src')
+  reviewer = review_meta.search('.review-detail__abstract').text.strip
+  #contents = review_meta.search('.contents').text.strip
+  review_date = review_meta.css('.pub-date').text
+  genre = review_meta.search('.genre-list__link').text
+  score = review_meta.search('.score').text.to_f
+  {
+    artist: artist,
+    album: album,
+    img: img,
+    reviewer: reviewer,
+    #contents: contents,
+    review_date: review_date,
+    genre: genre,
+    score: score
+  }
+end
+
+puts JSON.pretty_generate(reviews)
+	
+	
