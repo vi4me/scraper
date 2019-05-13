@@ -1,7 +1,6 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    byebug (11.0.1)
     connection_pool (2.2.2)
     domain_name (0.5.20180417)
       unf (>= 0.0.5, < 1.0.0)
@@ -39,7 +38,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  byebug
   httparty
   mechanize
   nokogiri
