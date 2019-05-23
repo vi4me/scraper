@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <link rel="stylesheet"
+  href="http://current.bootstrapcdn.com/bootstrap-v204/css/bootstrap-combined.min.css">
+</head>
+
+<body>
+  <div class="span8">
+    <!-- This is table layout is pulled directly from twitter bootstrap -->
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Название</th>
+            <th>В ролях</th>
+            <th>Год</th>
+            <th>Описание</th>
+            <th>Дата</th>
+            <th>Фото</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @film_cards.each do |film_card| %>
+          <tr>
+            <td><%= title = film_card.css('div.postertitle h2').text %></td>
+            <td><%= v_rolyah = film_card.css('div.janrshort').text %></td>
+            <td><%= year = film_card.css('div.godshort').text %></td>
+            <td><%= opisanie = film_card.css('div.shorttext').text %></td>
+            <td><%= date = film_card.css('div.shorticon').text %></td>
+            <td><%= img = film_card.css('div.postershort a img')[0] %></td>
+          </tr>
+         <% end %>
+        </tbody>
+      </table>
+    </div>
+    
+</body>
+</html>
