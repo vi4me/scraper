@@ -1,21 +1,23 @@
 require 'nokogiri'
 require 'open-uri'
 require 'httparty'
+require 'json'
+require 'mechanize'
 require 'sinatra'
 
+get '/' do
 
+  agent = Mechanize.new
+  page  = agent.get('https://pampik.com/category/ergo-rukzaki')
+  
+  review_links = page.links_with(:class => 'product-item__img')
+  
+  reviews = review_links.map do |link|
+  	review = link.click
+  	@review_metas = review.search('.main')
 
-
-
-get '/marvel2/page/:page' do |page|
-
-  url = "https://kinokrad.co/marvel2/page/#{page}/"
- 		
-  unparsed_page = HTTParty.get(url)
-  parsed_page = Nokogiri::HTML(unparsed_page)
-  @film_cards = parsed_page.css('div.shorbox')
-
-  erb :index
+  	erb :index
+  end
 end
 
 
